@@ -1,5 +1,4 @@
 from os import path
-import random
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .messages import Messages
