@@ -105,7 +105,8 @@ ENV/
 env.bak/
 venv.bak/
 .idea/
-
+.DS_Store
+*/.DS_store
 
 # mkdocs documentation
 /site
