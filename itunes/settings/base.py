@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     # 3rd party apps
     'django',
     'rest_framework',
-    'rest_framework_simplejwt',
+    'djoser',
+    'drf_yasg',
 
     # apps
     'accounts'
@@ -107,3 +108,10 @@ REST_FRAMEWORK = {
     )
 }
 AUTH_USER_MODEL = 'accounts.User'
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'accounts.api.serializers.UserCreateSerializers',
+        'current_user': 'accounts.api.serializers.UserSerializers',
+    }
+}
