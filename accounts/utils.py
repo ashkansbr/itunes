@@ -8,7 +8,7 @@ class FilePath:
 
     @staticmethod
     def is_image(ext):
-        support_ext = ['jpg', 'jpg', 'png', 'bmp', 'webp']
+        support_ext = ['jpg', 'jpeg', 'png', 'bmp', 'webp']
         if ext.lower() not in support_ext:
             raise ValidationError(Messages.INVALID_FORMAT.value)
         return True
