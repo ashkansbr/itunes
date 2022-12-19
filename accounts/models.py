@@ -45,3 +45,69 @@ class Profile(BaseModel):
     wallet = models.PositiveIntegerField(help_text=_('مقدار کیف پول به تومان'))
     email = models.EmailField(blank=True)
     birth_date = models.DateTimeField(blank=True)
+    province = models.ForeignKey('Province',
+                                 models.SET_NULL,
+                                 blank=True,
+                                 null=True)
+
+
+class City(BaseModel):
+    name = models.CharField(max_length=50,
+                            unique=True
+                            )
+
+    class Meta:
+        verbose_name_plural = "Cities"
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class Province(BaseModel):
+    name = models.CharField(max_length=50,
+                            unique=True
+                            )
+    post_price = models.PositiveIntegerField(default=15000)
+    cities = models.ManyToManyField(City,
+                                    related_name='provinces',
+                                    related_query_name='province')
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name_plural = 'Provinces'
+
+    def __str__(self):
+        return self.name
+
+
+class Address(BaseModel):
+    title = models.CharField(max_length=50,
+                             unique=True
+                             )
+    profile = models.ForeignKey(Profile,
+                                on_delete=models.CASCADE,
+                                related_name='addresses',
+                                related_query_name='address'
+                                )
+    province = models.ForeignKey('Province',
+                                 on_delete=models.CASCADE,
+                                 related_name='addresses',
+                                 related_query_name='address')
+    city = models.ForeignKey('City',
+                             on_delete=models.CASCADE,
+                             related_name='addresses',
+                             related_query_name='address')
+
+    address = models.TextField()
+
+    @property
+    def post_price(self):
+        return self.province.post_price
+
+    def __str__(self):
+        return '{}-{}-{}'.format(self.province, self.city, self.address)
+
+    class Meta:
+        unique_together = ('title', 'profile')
+
