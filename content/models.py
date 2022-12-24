@@ -4,7 +4,7 @@ from django.contrib.sites.models import Site
 from reusable.utils import create_slug_fa, get_client_ip_address
 
 
-class ItunesPages():
+class ItunesPages:
     START_PAGE = 'start_page'
     MUSIC_PAGE = 'music_page'
     BOOK_PAGE = 'book_page'
