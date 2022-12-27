@@ -1,6 +1,6 @@
 from .base import *
 from minio import Minio
-from datetime import timedelta
+from typing import List, Tuple
 
 
 DATABASES = {
@@ -31,7 +31,6 @@ MINIO_ENDPOINT = '127.0.0.1:9001'
 MINIO_ACCESS_KEY = '1NC6XT6PloVFBH9T'
 MINIO_SECRET_KEY = 'ohYb1G7qdnrfxRAqwXZHFgEpkEIB1O1r'
 MINIO_USE_HTTPS = False
-MINIO_URL_EXPIRY_HOURS = timedelta(hours=2)  # Default is 7 days (longest) if not defined
 
 MINIO_PRIVATE_BUCKETS = [
     # --- unused buckets, included in migrations, django-minio-backends requires them
