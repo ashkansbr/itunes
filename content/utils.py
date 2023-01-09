@@ -79,4 +79,10 @@ def track_zip_path(instance, filename):
         return path.join('.', 'zip', 'track', '{}{}'.format(int(timezone.now().timestamp()), ext))
 
 
+def album_demo_path(instance, filename):
+    ext = filename.split('.')[-1].lower()
+    if is_audio(ext):
+        return path.join('.', 'img', 'album_demo', '{}{}'.format(int(timezone.now().timestamp()), ext))
+
+
 
