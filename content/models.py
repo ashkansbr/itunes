@@ -1,8 +1,11 @@
 from django.db import models
 from common.basemodels import BaseModel
 from django.contrib.sites.models import Site
+from django.contrib.contenttypes.fields import GenericRelation
+from social.models import Rate, Like, Comment
+from django.db.models import F, Avg, Sum, Count
 from .utils import genre_image_path, playlist_cover_path, playlist_mobile_cover_path, album_mobile_head_cover_path,\
-    album_cover_path, album_list_cover_path, cover_zip_path
+    album_cover_path, album_list_cover_path, cover_zip_path, album_demo_path
 from django_minio_backend import MinioBackend
 from reusable.utils import create_slug_fa, get_client_ip_address
 from utility.models import Channels
@@ -131,4 +134,84 @@ class Album(BaseModel):
     physical_discount = models.FloatField()
     genres = models.ManyToManyField(Genre, related_name='albums', related_query_name='album', blank=True)
     channels = models.ManyToManyField(Channels, related_name='albums', related_query_name='album')
+    rate = GenericRelation(Rate, related_name='content_album')
+    like = GenericRelation(Like, related_name='content_album')
+    comment = GenericRelation(Comment, related_name='content_album')
+    enable = models.BooleanField(default=True)
+    pre_sale = models.BooleanField(default=False)
+    demo = models.FileField(upload_to=album_demo_path, blank=True, storage=MinioBackend(bucket_name='itunes-public'))
 
+    def __str__(self):
+        return '{}{}'.format(self.title, self.id)
+
+    @property
+    def slug(self):
+        if self.title_en == '':
+            return str(self.id)
+        data = []
+        data.extend([item for item in self.title_en.split(' ') if item != ''])
+        return '-'.join(data)
+
+    @property
+    def slug_fa(self):
+        if self.title == '':
+            return str(self.id)
+        data = []
+        data.extend([item for item in self.title.split(' ') if item != ''])
+        return '-'.join(data)
+
+
+class AlbumFeedCategory(BaseModel):
+    title = models.CharField(max_length=60, unique=True)
+    albums = models.ManyToManyField(Album,
+                                    related_name='album_categories',
+                                    related_query_name='album_category',
+                                    through='AlbumFeedCategoryAlbumRelation')
+    sites = models.ManyToManyField(Site)
+    order = models.PositiveIntegerField(default=0)
+    enable = models.BooleanField(default=True)
+
+    @property
+    def slug_fa(self):
+        return create_slug_fa(self.title)
+
+
+class AlbumFeedCategoryAlbumRelation(BaseModel):
+    album_feed_category = models.ForeignKey(AlbumFeedCategory, on_delete=models.CASCADE)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ('order',)
+
+
+class AlbumVideo(BaseModel):
+    album = models.ForeignKey(Album,
+                              on_delete=models.CASCADE,
+                              related_name='album_videos',
+                              related_query_name='album_video',
+                              )
+    tags = models.ManyToManyField(Tag, related_name='album_tags', related_query_name='album_tag', blank=True)
+    comments = GenericRelation(Comment, related_query_name='album_video_comment')
+    likes = GenericRelation(Like, related_query_name='album_video_like')
+    rates = GenericRelation(Rate, related_query_name='album_video_rate')
+
+    @property
+    def title(self):
+        return self.album.title
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def slug_fa(self):
+        return create_slug_fa(self.title)
+
+    @property
+    def rate_score(self):
+        return self.rates.all().aggregate(Avg('score'))['score_avg']
+
+    @property
+    def like_no(self):
+        return self.likes.count()
+    
