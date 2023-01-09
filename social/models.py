@@ -43,6 +43,22 @@ class Comment(BaseModel):
         return '{}{}'.format(self.content_type, self.profile.name)
 
 
+class Rate(BaseModel):
+    profile = models.ForeignKey(User.profile,
+                                on_delete=models.CASCADE,
+                                related_name='social_rates',
+                                related_query_name='social_rate'
+                                )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+
+    class Meta:
+        unique_together = ('profile', 'object_id', 'content_type')
+
+    def __str__(self):
+        return '{}{}'.format(self.content_type, self.profile.name)
+
 
 
 
